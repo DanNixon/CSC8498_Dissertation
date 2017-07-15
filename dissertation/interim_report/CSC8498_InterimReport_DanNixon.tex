@@ -1,0 +1,183 @@
+\documentclass{entcs}
+\usepackage{CSC8498macro}
+
+\makeatletter
+
+\def\lastname{CSC8498}
+
+% http://tex.stackexchange.com/questions/283141/latex-error-command-cauthor-already-defined
+\makeatletter
+\let\c@author\relax
+\makeatother
+
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{CSC8498_InterimReport_DanNixon.bib}
+
+\ifx\pdftexversion\undefined
+\usepackage[dvips]{graphicx}
+\else
+\usepackage[pdftex]{graphicx}
+\DeclareGraphicsRule{*}{mps}{*}{}
+\fi
+
+\begin{document}
+
+\begin{frontmatter}
+  \title{Cost effective, large scale, fixed world 3D scanning}
+  \author{Dan Nixon}
+  \address{School of Computing Science, Newcastle University, UK}
+  \thanks[email]{Email:
+    \href{mailto:d.nixon2@ncl.ac.uk}
+         {\texttt{\normalshape{d.nixon2@ncl.ac.uk}}}}
+
+  % \begin{abstract}
+  % \end{abstract}
+
+  \begin{keyword}
+    3D scanning, point clouds
+  \end{keyword}
+\end{frontmatter}
+
+\section{Introduction}
+\label{sec:introduction}
+
+This project focuses on the capture of 3D point clouds and the process of
+aligning a large number of them to recreate a large environment.
+
+The most common methods for performing this type of environment scan typically
+use the point cloud alone to inform the alignment which can add additional
+computation cost and in the case where the environment contains very few or
+repetitive features, can increase alignment error.
+
+It is hypothesised that if the position and orientation of the camera can be
+accurately measured at the same time as the point clouds are captured then the
+complexity of the alignment proces can be significantly reduced.
+
+\section{Aim and objectives}
+\label{sec:aim_and_objectives}
+
+The aim of this project is to evaluate the performance of such a 3D capture
+system in a variety of environments.
+
+\subsection{Objectives}
+\label{sec:objectives}
+
+\begin{itemize}
+  \item
+    Implementation of a point cloud capture program with plugin-style processing
+    options.
+
+  \item
+    Sense camera position and orientation to a sufficient accuracy without
+    camera feedback
+
+  \item
+    Implementation of point cloud alignment algorithms informed by camera
+    position and orientation
+
+  \item
+    Evaluation of the performance (both computational and functional) of
+    implemented algorithms
+
+\end{itemize}
+
+\section{Work plan}
+\label{sec:work_plan}
+
+The following describes a series of high level tasks that together address the
+objectives of the project.
+
+The deliverables for all but the evaluation will be in the form of source code
+implementing the relevant features. The evaluation will be presented in the
+dissertation.
+
+Due dates for specific tasks are given in brackets.
+
+\subsection{Framework (complete)}
+\label{sec:framework}
+
+This consists of the essential framework that will be used to create the capture
+and processing applications required for the project and integration of the
+required external libraries (Point Cloud Library \cite{Rusu_ICRA2011_PCL},
+Eigen3 \cite{eigenweb}, Boost \cite{BoostLibs}) into a build system (CMake
+\cite{CMake}).
+
+\subsection{Position and orientation tracking (due 2nd May)}
+\label{sec:position_and_orientation_tracking}
+
+The position and orientation of the camera, which in the case of this project
+will be a Microsoft Kinect, will be monitored by a device fixed to the camera
+body consisting of a series of sensors and a microcontroller performing data
+acquisition and sensor fusion as well as communicating with the capture program
+running on a PC.
+
+At the very minimum this sensor must measure the orientation using a triple axis
+accelerometer and gyroscope and displacement through double integration of 3D
+acceleration.
+
+From this baseline further sensors can be added that can be used to both
+increase the accuracy of the measurement and provide an absolute measurement.
+
+\subsection{Alignment techniques}
+\label{sec:alignment_techniques}
+
+Several processing techniques will be implemented that align a series of
+captured point clouds into a single cloud depicting the environment being
+scanned.
+
+In each case the alignment technique will be a Normalised Distributions
+Transformation (NDT) alignment \cite{merten2008three}. This method describes a
+point cloud as a selection of cells where the surface geometry is described by a
+probability distribution function.
+
+This representation allows the alignment to be decomposed to an optimisation
+problem that aims to maximise the likelihood of overlapping cells corresponding
+to the same surface.
+
+\subsubsection{Alignment into world (complete)}
+
+This method performs an NDT alignment of each captured point cloud onto a single
+cloud that represents the entire environment scanned.
+
+This allows for the camera position to be changed by any amount as long as there
+is still a partial overlap with already scanned environment.
+
+\subsubsection{Incremental capture alignment (complete)}
+
+This method performs an NDT alignment of each new point cloud onto the
+previously captured point cloud and saves pairs of point clouds and
+transformations from which a world cloud can be created as a post processing
+step.
+
+This method requires that each new point cloud captured overlaps the last cloud
+captured, however will have a much smaller memory footprint than the world
+alignment method mentioned previously.
+
+\subsubsection{Incremental chunk alignment (due 5th May)}
+
+A hybrid of the previous two methods can be implemented where chunks of the
+environment are scanned at a time using the first method and then saved once a
+certain level of detail is reached along with a transformation such that the
+chunks can later be combined to form a much larger point cloud, as per the
+second method.
+
+\subsection{Evaluation and Documentation (due 19th May)}
+\label{sec:evaluation}
+
+An evaluation of the effectiveness of the three implemented alignment strategies
+will be carried out; this will cover environments that pose potential issues to
+such a scanning system (i.e. those with similar surfaces or high noise) and a
+range of motion behaviours to test the durability of the orientation and
+position measurement (e.g. fast/sharp movements are more likely to cause error
+in IMU positioning).
+
+This evaluation may be extended to comparison to existing scanning systems,
+however the more relevant measure is how well the reconstructed geometry
+represents the original.
+
+The implementation of the system will be documented in the dissertation along
+with possible issues and improvements.
+
+\printbibliography
+
+\end{document}
