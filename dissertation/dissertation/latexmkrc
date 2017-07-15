@@ -1,0 +1,4 @@
+add_cus_dep('gnuplot','tex', 0, 'makegnu2tex');
+    sub makegnu2tex {
+    system("gnuplot \"$_[0].gnuplot\"") ;
+    }
